@@ -17,7 +17,7 @@ export default function DrivePage() {
         <div className="text-center h-full flex items-center justify-center gap-4">
           <h2 className="text-sm font-bold text-white flex items-center justify-center">Welcome, {user.email}!</h2>
           <button
-            onClick={() => auth.signOut()}
+            onClick={() => { auth.signOut(); redirect("/sign-in") }}
             className="bg-red-500 text-white p-2 rounded hover:bg-red-600"
           >
             Sign Out

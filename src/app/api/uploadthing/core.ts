@@ -1,9 +1,7 @@
-import { auth } from "@clerk/nextjs/server";
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { UploadThingError } from "uploadthing/server";
 import { z } from "zod";
-import { MUTATIONS, QUERIES } from "~/server/db/queries";
-
+import { auth } from '~/lib/firebase/firebaseConfig';
 const f = createUploadthing();
 
 // FileRouter for your app, can contain multiple FileRoutes
@@ -27,38 +25,38 @@ export const ourFileRouter = {
     // Set permissions and file types for this FileRoute
     .middleware(async ({ input }) => {
       // This code runs on your server before upload
-      const user = await auth();
+      const user = auth.currentUser;
 
       // If you throw, the user will not be able to upload
       // eslint-disable-next-line @typescript-eslint/only-throw-error
-      if (!user.userId) throw new UploadThingError("Unauthorized");
+      if (!user) throw new UploadThingError("Unauthorized");
 
-      const folder = await QUERIES.getFolderById(input.folderId);
+      // const folder = await QUERIES.getFolderById(input.folderId);
 
       // eslint-disable-next-line @typescript-eslint/only-throw-error
-      if (!folder) throw new UploadThingError("Folder not found");
+      // if (!folder) throw new UploadThingError("Folder not found");
 
-      if (folder.ownerId !== user.userId)
+      // if (folder.ownerId !== user.userId)
         // eslint-disable-next-line @typescript-eslint/only-throw-error
-        throw new UploadThingError("Unauthorized");
+        // throw new UploadThingError("Unauthorized");
 
       // Whatever is returned here is accessible in onUploadComplete as `metadata`
-      return { userId: user.userId, parentId: input.folderId };
+      return { userId: "123", parentId: input.folderId }; //TODO:userId
     })
     .onUploadComplete(async ({ metadata, file }) => {
       // This code RUNS ON YOUR SERVER after upload
       console.log("Upload complete for userId:", metadata.userId);
       console.log("file url", file.url);
 
-      await MUTATIONS.createFile({
-        file: {
-          name: file.name,
-          size: file.size,
-          url: file.url,
-          parent: metadata.parentId,
-        },
-        userId: metadata.userId,
-      });
+      // await MUTATIONS.createFile({
+      //   file: {
+      //     name: file.name,
+      //     size: file.size,
+      //     url: file.url,
+      //     parent: metadata.parentId,
+      //   },
+      //   userId: metadata.userId,
+      // });
 
       // !!! Whatever is returned here is sent to the clientside `onClientUploadComplete` callback
       return { uploadedBy: metadata.userId };

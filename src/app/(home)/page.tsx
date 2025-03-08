@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
 import { Button } from "~/components/ui/button";
-
+import { auth } from '../../lib/firebase/firebaseConfig';
 export default function HomePage() {
+  const user = auth.currentUser;
   return (
     <>
       <h1 className="mb-4 bg-gradient-to-r from-neutral-200 to-neutral-400 bg-clip-text text-5xl font-bold text-transparent md:text-6xl">
@@ -12,14 +13,9 @@ export default function HomePage() {
       </p>
       <form
         action={async () => {
-          "use server";
-
-          // const session = await auth();
-
-          // if (!session.userId) {
-          //   return redirect("/sign-in");
-          // }
-
+          if (!user) {
+            return redirect("/sign-in");
+          }
           return redirect("/drive");
         }}
       >

@@ -2,24 +2,28 @@
 
 import { Upload, ChevronRight } from "lucide-react";
 import { FileRow, FolderRow } from "./file-row";
-import type { files_table, folders_table } from "~/server/db/schema";
 import Link from "next/link";
-import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { UploadButton } from "~/components/uploadthing";
 import { useRouter } from "next/navigation";
 import { usePostHog } from "posthog-js/react";
-
+import { auth } from '~/lib/firebase/firebaseConfig';
+import { useEffect } from 'react';
 export default function DriveContents(props: {
-  files: (typeof files_table.$inferSelect)[];
-  folders: (typeof folders_table.$inferSelect)[];
-  parents: (typeof folders_table.$inferSelect)[];
+  files: { id: string, url: string, name: string, size: string }[];//(typeof files_table.$inferSelect)[];
+  folders: { id: string, name: string }[];// (typeof folders_table.$inferSelect)[];
+  parents: { id: string, name: string }[];//(typeof folders_table.$inferSelect)[];
 
   currentFolderId: number;
-}) {
+}): JSX.Element {
   const navigate = useRouter();
 
   const posthog = usePostHog();
-
+  const user = auth.currentUser;
+  useEffect(() => {
+    if (!user) {
+      navigate.push("/sign-in");
+    }
+  }, [user, navigate]);
   return (
     <div className="min-h-screen bg-gray-900 p-8 text-gray-100">
       <div className="mx-auto max-w-6xl">
@@ -40,13 +44,20 @@ export default function DriveContents(props: {
               </div>
             ))}
           </div>
-          <div>
-            <SignedOut>
+          <div className='flex items-center gap-4'>
+            <h2 className="text-sm text-white flex items-center justify-center">Welcome, {user!.email?.split("@")[0] ?? "new user"}!</h2>
+            <button
+              onClick={() => auth.signOut()}
+              className="bg-red-500 text-white p-2 rounded hover:bg-red-600 h-10"
+            >
+              Sign Out
+            </button>
+            {/* <SignedOut>
               <SignInButton />
             </SignedOut>
             <SignedIn>
               <UserButton />
-            </SignedIn>
+            </SignedIn> */}
           </div>
         </div>
         <div className="rounded-lg bg-gray-800 shadow-xl">

@@ -1,10 +1,11 @@
+"use client"
 import { redirect } from "next/navigation";
 import { Button } from "~/components/ui/button";
+import { auth } from '../../../lib/firebase/firebaseConfig';
 
-export default async function DrivePage() {
-  // const session = await auth();
-  const session = {userId:"1"}
-  if (!session.userId) {
+export default function DrivePage() {
+  const user = auth.currentUser;
+  if (!user) {
     return redirect("/sign-in");
   }
 
@@ -12,22 +13,30 @@ export default async function DrivePage() {
   const rootFolder = undefined
   if (!rootFolder) {
     return (
-      <form
-        action={async () => {
-          "use server";
-          // const session = await auth();
+      <>
+        <div className="text-center h-full flex items-center justify-center gap-4">
+          <h2 className="text-sm font-bold text-white flex items-center justify-center">Welcome, {user.email}!</h2>
+          <button
+            onClick={() => auth.signOut()}
+            className="bg-red-500 text-white p-2 rounded hover:bg-red-600"
+          >
+            Sign Out
+          </button>
+        </div>
+        <form
+          action={async () => {
+            if (!user) {
+              return redirect("/sign-in");
+            }
 
-          if (!session.userId) {
-            return redirect("/sign-in");
-          }
+            // const rootFolderId = await MUTATIONS.onboardUser(session.userId);
 
-          // const rootFolderId = await MUTATIONS.onboardUser(session.userId);
-
-          // return redirect(`/f/${rootFolderId}`);
-        }}
-      >
-        <Button>Create new Drive</Button>
-      </form>
+            // return redirect(`/f/${rootFolderId}`);
+          }}
+        >
+          <Button>Create new Folder</Button>
+        </form>
+      </>
     );
   }
 

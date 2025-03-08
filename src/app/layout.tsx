@@ -3,7 +3,7 @@ import "~/styles/globals.css";
 import { GeistSans } from "geist/font/sans";
 import { type Metadata } from "next";
 export const metadata: Metadata = {
-  title: "Drive Tutorial",
+  title: "TerraNova Drive",
   description: "It's like Google Drive, but worse!",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };

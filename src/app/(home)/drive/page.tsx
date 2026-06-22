@@ -5,7 +5,7 @@ import { useAuth } from "~/lib/keycloak/AuthProvider";
 
 export default function DrivePage() {
   const navigate = useNavigate();
-  const { initialized, authenticated, user, logout } = useAuth();
+  const { initialized, authenticated, user, organization, logout } = useAuth();
 
   useEffect(() => {
     if (initialized && !authenticated) {
@@ -26,6 +26,7 @@ export default function DrivePage() {
       <div className="text-center h-full flex items-center justify-center gap-4">
         <h2 className="text-sm font-bold text-white flex items-center justify-center">
           Welcome, {user?.email}!
+          {organization ? ` · ${organization.name}` : ""}
         </h2>
         <button
           onClick={logout}

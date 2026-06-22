@@ -22,7 +22,9 @@ yarn-debug.log*
 yarn-error.log*
 
 # local env files
-.env*.local
+.env*
+# la plantilla SÍ se versiona (no contiene secretos)
+!.env.example
 
 # vercel
 .vercel

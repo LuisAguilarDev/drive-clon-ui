@@ -3,7 +3,7 @@ import { FileRow, FolderRow } from "./file-row";
 import { Link, useNavigate } from "react-router-dom";
 import { UploadButton } from "~/components/uploadthing";
 import { usePostHog } from "posthog-js/react";
-import { auth } from "~/lib/firebase/firebaseConfig";
+import { useAuth } from "~/lib/keycloak/AuthProvider";
 import { useEffect } from "react";
 
 export default function DriveContents(props: {
@@ -15,12 +15,12 @@ export default function DriveContents(props: {
   const navigate = useNavigate();
 
   const posthog = usePostHog();
-  const user = auth.currentUser;
+  const { initialized, authenticated, user, logout } = useAuth();
   useEffect(() => {
-    if (!user) {
+    if (initialized && !authenticated) {
       navigate("/sign-in");
     }
-  }, [user, navigate]);
+  }, [initialized, authenticated, navigate]);
   return (
     <div className="min-h-screen bg-gray-900 p-8 text-gray-100">
       <div className="mx-auto max-w-6xl">
@@ -46,7 +46,7 @@ export default function DriveContents(props: {
               Welcome, {user?.email?.split("@")[0] ?? "new user"}!
             </h2>
             <button
-              onClick={() => auth.signOut()}
+              onClick={logout}
               className="bg-red-500 text-white p-2 rounded hover:bg-red-600 h-10"
             >
               Sign Out

@@ -1,39 +1,40 @@
 # Google Drive Clon - TerraNova Drive
 
 A React single-page app (Vite + Tailwind CSS v4) for a Google Drive-style file
-manager, with Firebase authentication and UploadThing uploads.
+manager, with Keycloak (OIDC) authentication and UploadThing uploads.
 
 ## Tech stack
 
 - **Build tool:** Vite 6
 - **UI:** React 18 + React Router 6
 - **Styling:** Tailwind CSS v4 (via `@tailwindcss/vite`)
-- **Auth:** Firebase 10 + FirebaseUI
+- **Auth:** Keycloak (OIDC via `keycloak-js`); Google sign-in is federated inside Keycloak
 - **Uploads:** UploadThing
 
 ## Prerequisites
 
-- Node.js 18+
+- Node.js 20+
+- pnpm 10 (`corepack enable` activates the version pinned in `packageManager`)
 
 ## Setup
 
 ```bash
-npm install
-cp .env.example .env   # fill in your Firebase web config (VITE_* vars)
+pnpm install
+cp .env.example .env   # set the Keycloak/API endpoints (VITE_* vars)
 ```
 
 ## Usage
 
 ```bash
-npm run dev        # start the Vite dev server
-npm run build      # production build to dist/
-npm run preview    # preview the production build
-npm run typecheck  # run the TypeScript type checker
+pnpm dev         # start the Vite dev server
+pnpm build       # production build to dist/
+pnpm preview     # preview the production build
+pnpm typecheck   # run the TypeScript type checker
 ```
 
 > Migrated from Next.js (App Router) to a Vite SPA. The former server-only
-> pieces (`src/app/api/uploadthing`, `src/env.js`, `src/app/layout.tsx`) are no
-> longer part of the build graph and are kept only for reference.
+> pieces (`src/app/api/uploadthing`, `src/app/layout.tsx`) are no longer part of
+> the build graph and are kept only for reference.
 
 ## TODO
 

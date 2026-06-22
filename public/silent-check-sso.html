@@ -1,0 +1,11 @@
+<!doctype html>
+<html>
+  <body>
+    <script>
+      // keycloak-js loads this page inside a hidden iframe to silently check the
+      // SSO session without a full page redirect. It just relays the result back
+      // to the main window.
+      parent.postMessage(location.href, location.origin);
+    </script>
+  </body>
+</html>

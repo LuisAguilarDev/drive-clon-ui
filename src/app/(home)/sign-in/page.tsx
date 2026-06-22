@@ -1,28 +1,32 @@
 import { Navigate } from "react-router-dom";
-import { auth } from "../../../lib/firebase/firebaseConfig";
-import "firebaseui/dist/firebaseui.css";
-import FirebaseSignIn from "~/components/FirebaseSignIn";
+import { Button } from "~/components/ui/button";
+import { useAuth } from "~/lib/keycloak/AuthProvider";
 
 const SignInPage = () => {
-  const config = {
-    signInOptions: [
-      {
-        provider: "google.com", // Login con Google
-        scopes: ["profile", "email"],
-      },
-    ],
-    signInFlow: "popup", // Opciones: 'popup' o 'redirect'
-    signInSuccessUrl: "/drive", // Redirección después de login exitoso
-    tosUrl: "/terms-of-service", // URL de términos de servicio
-    privacyPolicyUrl: "/privacy-policy", // URL de política de privacidad
-  };
-  const user = auth.currentUser;
-  if (user) {
+  const { initialized, authenticated, login } = useAuth();
+
+  if (!initialized) {
+    return <p className="text-neutral-400">Loading…</p>;
+  }
+
+  if (authenticated) {
     return <Navigate to="/drive" replace />;
   }
+
   return (
     <>
-      <FirebaseSignIn config={config} />
+      <h1 className="mb-4 text-3xl font-bold text-white">Sign in</h1>
+      <p className="mx-auto mb-8 max-w-md text-neutral-400">
+        Continue to TerraNova Drive with your Google account.
+      </p>
+      <Button
+        size="lg"
+        type="button"
+        onClick={() => login({ idpHint: "google", redirectTo: "/drive" })}
+        className="border border-neutral-700 bg-neutral-800 text-white transition-colors hover:bg-neutral-700"
+      >
+        Continue with Google
+      </Button>
       <footer className="mt-16 text-sm text-neutral-500">
         © {new Date().getFullYear()} TerraNova Drive. All rights reserved.
       </footer>

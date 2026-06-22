@@ -1,7 +1,6 @@
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { UploadThingError } from "uploadthing/server";
 import { z } from "zod";
-import { auth } from '~/lib/firebase/firebaseConfig';
 const f = createUploadthing();
 
 // FileRouter for your app, can contain multiple FileRoutes
@@ -24,12 +23,11 @@ export const ourFileRouter = {
     )
     // Set permissions and file types for this FileRoute
     .middleware(async ({ input }) => {
-      // This code runs on your server before upload
-      const user = auth.currentUser;
-
-      // If you throw, the user will not be able to upload
-      // eslint-disable-next-line @typescript-eslint/only-throw-error
-      if (!user) throw new UploadThingError("Unauthorized");
+      // This code runs on your server before upload.
+      // TODO: validate the Keycloak access token (forwarded from the client)
+      // against the realm JWKS and derive the real userId/org from its claims.
+      // Until that wiring exists, uploads stay open like the rest of the
+      // not-yet-wired data layer below.
 
       // const folder = await QUERIES.getFolderById(input.folderId);
 

@@ -1,13 +1,13 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "~/components/ui/button";
-import { auth } from "../../lib/firebase/firebaseConfig";
+import { useAuth } from "~/lib/keycloak/AuthProvider";
 
 export default function HomePage() {
   const navigate = useNavigate();
-  const user = auth.currentUser;
+  const { authenticated } = useAuth();
 
   const handleGetStarted = () => {
-    navigate(user ? "/drive" : "/sign-in");
+    navigate(authenticated ? "/drive" : "/sign-in");
   };
 
   return (

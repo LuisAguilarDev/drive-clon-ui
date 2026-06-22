@@ -1,35 +1,34 @@
 import { useEffect } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { Button } from "~/components/ui/button";
-import { auth } from "../../../lib/firebase/firebaseConfig";
+import { useAuth } from "~/lib/keycloak/AuthProvider";
 
 export default function DrivePage() {
   const navigate = useNavigate();
-  const user = auth.currentUser;
+  const { initialized, authenticated, user, logout } = useAuth();
 
   useEffect(() => {
-    if (!user) {
+    if (initialized && !authenticated) {
       navigate("/sign-in");
     }
-  }, [user, navigate]);
+  }, [initialized, authenticated, navigate]);
 
-  if (!user) {
-    return <Navigate to="/sign-in" replace />;
+  if (!initialized) {
+    return <p className="text-neutral-400">Loading…</p>;
   }
 
-  const handleSignOut = async () => {
-    await auth.signOut();
-    navigate("/sign-in");
-  };
+  if (!authenticated) {
+    return <Navigate to="/sign-in" replace />;
+  }
 
   return (
     <>
       <div className="text-center h-full flex items-center justify-center gap-4">
         <h2 className="text-sm font-bold text-white flex items-center justify-center">
-          Welcome, {user.email}!
+          Welcome, {user?.email}!
         </h2>
         <button
-          onClick={handleSignOut}
+          onClick={logout}
           className="bg-red-500 text-white p-2 rounded hover:bg-red-600"
         >
           Sign Out

@@ -12,6 +12,11 @@ export default function HomePage() {
 
   return (
     <>
+      <img
+        src="/favicon.ico"
+        alt="TerraNova Drive logo"
+        className="mx-auto mb-6 h-24 w-24 rounded-full bg-white p-3 shadow-lg"
+      />
       <h1 className="mb-4 bg-gradient-to-r from-neutral-200 to-neutral-400 bg-clip-text text-5xl font-bold text-transparent md:text-6xl">
         TerraNova Drive
       </h1>

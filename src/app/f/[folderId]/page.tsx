@@ -1,21 +1,21 @@
+import { useParams } from "react-router-dom";
 import DriveContents from "./drive-contents";
-// import { QUERIES } from "~/server/db/queries";
 
-export default async function GoogleDriveClone(props: {
-  params: Promise<{ folderId: string }>;
-}) {
-  const params = await props.params;
+type DriveFolder = { id: string; name: string };
+type DriveFile = { id: string; url: string; name: string; size: string };
 
-  const parsedFolderId = parseInt(params.folderId);
+export default function GoogleDriveClone() {
+  const { folderId } = useParams<{ folderId: string }>();
+
+  const parsedFolderId = parseInt(folderId ?? "", 10);
   if (isNaN(parsedFolderId)) {
     return <div>Invalid folder ID</div>;
   }
 
-  const [folders, files, parents] = await Promise.all([
-    [],// getFolders(parsedFolderId),
-    [],//getFiles(parsedFolderId),
-    [],//getAllParentsForFolder(parsedFolderId),
-  ]);
+  // Data fetching is not wired up yet — render with empty collections.
+  const folders: DriveFolder[] = [];
+  const files: DriveFile[] = [];
+  const parents: DriveFolder[] = [];
 
   return (
     <DriveContents

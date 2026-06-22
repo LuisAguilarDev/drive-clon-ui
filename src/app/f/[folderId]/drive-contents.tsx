@@ -1,27 +1,24 @@
-"use client";
-
-import { Upload, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { FileRow, FolderRow } from "./file-row";
-import Link from "next/link";
+import { Link, useNavigate } from "react-router-dom";
 import { UploadButton } from "~/components/uploadthing";
-import { useRouter } from "next/navigation";
 import { usePostHog } from "posthog-js/react";
-import { auth } from '~/lib/firebase/firebaseConfig';
-import { useEffect } from 'react';
-export default function DriveContents(props: {
-  files: { id: string, url: string, name: string, size: string }[];//(typeof files_table.$inferSelect)[];
-  folders: { id: string, name: string }[];// (typeof folders_table.$inferSelect)[];
-  parents: { id: string, name: string }[];//(typeof folders_table.$inferSelect)[];
+import { auth } from "~/lib/firebase/firebaseConfig";
+import { useEffect } from "react";
 
+export default function DriveContents(props: {
+  files: { id: string; url: string; name: string; size: string }[];
+  folders: { id: string; name: string }[];
+  parents: { id: string; name: string }[];
   currentFolderId: number;
-}): JSX.Element {
-  const navigate = useRouter();
+}) {
+  const navigate = useNavigate();
 
   const posthog = usePostHog();
   const user = auth.currentUser;
   useEffect(() => {
     if (!user) {
-      navigate.push("/sign-in");
+      navigate("/sign-in");
     }
   }, [user, navigate]);
   return (
@@ -29,14 +26,14 @@ export default function DriveContents(props: {
       <div className="mx-auto max-w-6xl">
         <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center">
-            <Link href="/f/1" className="mr-2 text-gray-300 hover:text-white">
+            <Link to="/f/1" className="mr-2 text-gray-300 hover:text-white">
               My Drive
             </Link>
-            {props.parents.map((folder, index) => (
+            {props.parents.map((folder) => (
               <div key={folder.id} className="flex items-center">
                 <ChevronRight className="mx-2 text-gray-500" size={16} />
                 <Link
-                  href={`/f/${folder.id}`}
+                  to={`/f/${folder.id}`}
                   className="text-gray-300 hover:text-white"
                 >
                   {folder.name}
@@ -44,20 +41,16 @@ export default function DriveContents(props: {
               </div>
             ))}
           </div>
-          <div className='flex items-center gap-4'>
-            <h2 className="text-sm text-white flex items-center justify-center">Welcome, {user!.email?.split("@")[0] ?? "new user"}!</h2>
+          <div className="flex items-center gap-4">
+            <h2 className="text-sm text-white flex items-center justify-center">
+              Welcome, {user?.email?.split("@")[0] ?? "new user"}!
+            </h2>
             <button
               onClick={() => auth.signOut()}
               className="bg-red-500 text-white p-2 rounded hover:bg-red-600 h-10"
             >
               Sign Out
             </button>
-            {/* <SignedOut>
-              <SignInButton />
-            </SignedOut>
-            <SignedIn>
-              <UserButton />
-            </SignedIn> */}
           </div>
         </div>
         <div className="rounded-lg bg-gray-800 shadow-xl">
@@ -81,14 +74,14 @@ export default function DriveContents(props: {
         <UploadButton
           endpoint="driveUploader"
           onBeforeUploadBegin={(files) => {
-            posthog.capture("files_uploading", {
+            posthog?.capture("files_uploading", {
               fileCount: files.length,
             });
 
             return files;
           }}
           onClientUploadComplete={() => {
-            navigate.refresh();
+            navigate(0);
           }}
           input={{
             folderId: props.currentFolderId,

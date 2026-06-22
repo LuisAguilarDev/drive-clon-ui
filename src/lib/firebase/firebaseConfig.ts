@@ -1,26 +1,26 @@
 import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
 import { getAuth } from "firebase/auth";
-import { env } from "../../env"
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+// Your web app's Firebase configuration.
+// Values are read from Vite environment variables (prefixed with VITE_) at
+// build time. See .env.example for the expected keys. The messagingSenderId,
+// appId and measurementId fall back to the original project's public values.
 const firebaseConfig = {
-  apiKey: env.NEXT_PUBLIC_firebase_apiKey,
-  authDomain: env.NEXT_PUBLIC_firebase_authDomain,
-  databaseURL: env.NEXT_PUBLIC_firebase_databaseURL,
-  projectId: env.NEXT_PUBLIC_firebase_projectId,
-  storageBucket: env.NEXT_PUBLIC_firebase_storageBucket,
-  messagingSenderId: "678941564362",
-  appId: "1:678941564362:web:15df0a2ece7076dd934333",
-  measurementId: "G-VN3BSPJ14M"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId:
+    import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID ?? "678941564362",
+  appId:
+    import.meta.env.VITE_FIREBASE_APP_ID ??
+    "1:678941564362:web:15df0a2ece7076dd934333",
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID ?? "G-VN3BSPJ14M",
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-// const analytics = getAnalytics(app);
 const auth = getAuth(app);
 
 export { auth };

@@ -1,0 +1,16 @@
+# Imagen de desarrollo del frontend React + Vite (hot-reload vía volumen)
+FROM node:20-slim
+
+WORKDIR /app
+
+# Instalar dependencias primero (mejor uso de la cache de capas)
+COPY package.json package-lock.json ./
+RUN npm install
+
+# El código se monta como volumen en docker-compose; esta copia es para builds standalone
+COPY . .
+
+EXPOSE 5173
+
+# El comando real lo define docker-compose; este es el fallback para `docker run`
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "5173"]

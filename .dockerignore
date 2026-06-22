@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.next/
+.git/
+.vscode/
+.idea/
+*.env
+*.env.*
+.env
+*.log

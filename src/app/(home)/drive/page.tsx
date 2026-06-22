@@ -1,44 +1,49 @@
-"use client"
-import { redirect } from "next/navigation";
+import { useEffect } from "react";
+import { Navigate, useNavigate } from "react-router-dom";
 import { Button } from "~/components/ui/button";
-import { auth } from '../../../lib/firebase/firebaseConfig';
+import { auth } from "../../../lib/firebase/firebaseConfig";
 
 export default function DrivePage() {
+  const navigate = useNavigate();
   const user = auth.currentUser;
+
+  useEffect(() => {
+    if (!user) {
+      navigate("/sign-in");
+    }
+  }, [user, navigate]);
+
   if (!user) {
-    return redirect("/sign-in");
+    return <Navigate to="/sign-in" replace />;
   }
 
-  // const rootFolder = await QUERIES.getRootFolderForUser(session.userId);
-  const rootFolder = undefined
-  if (!rootFolder) {
-    return (
-      <>
-        <div className="text-center h-full flex items-center justify-center gap-4">
-          <h2 className="text-sm font-bold text-white flex items-center justify-center">Welcome, {user.email}!</h2>
-          <button
-            onClick={() => { auth.signOut(); redirect("/sign-in") }}
-            className="bg-red-500 text-white p-2 rounded hover:bg-red-600"
-          >
-            Sign Out
-          </button>
-        </div>
-        <form
-          action={async () => {
-            if (!user) {
-              return redirect("/sign-in");
-            }
+  const handleSignOut = async () => {
+    await auth.signOut();
+    navigate("/sign-in");
+  };
 
-            // const rootFolderId = await MUTATIONS.onboardUser(session.userId);
-
-            // return redirect(`/f/${rootFolderId}`);
-          }}
+  return (
+    <>
+      <div className="text-center h-full flex items-center justify-center gap-4">
+        <h2 className="text-sm font-bold text-white flex items-center justify-center">
+          Welcome, {user.email}!
+        </h2>
+        <button
+          onClick={handleSignOut}
+          className="bg-red-500 text-white p-2 rounded hover:bg-red-600"
         >
-          <Button>Create new Folder</Button>
-        </form>
-      </>
-    );
-  }
-
-  // return redirect(`/f/${rootFolder.id}`);
+          Sign Out
+        </button>
+      </div>
+      <form
+        onSubmit={(event) => {
+          event.preventDefault();
+          // const rootFolderId = await MUTATIONS.onboardUser(user.uid);
+          // navigate(`/f/${rootFolderId}`);
+        }}
+      >
+        <Button type="submit">Create new Folder</Button>
+      </form>
+    </>
+  );
 }

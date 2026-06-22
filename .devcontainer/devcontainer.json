@@ -3,20 +3,11 @@
 {
 	"name": "Node.js & TypeScript",
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	// "image": "mcr.microsoft.com/devcontainers/typescript-node:1-20-bullseye",
-	"build":{
-		"dockerfile": "Dockerfile"
-	},
+	"image": "mcr.microsoft.com/devcontainers/typescript-node:1-22-bookworm",
 	"features": {
 		"ghcr.io/devcontainers/features/git:1": {}
 	},
-	"runArgs": [
-		"--name", "drive-clon-ui"
-	],
-	"remoteEnv": {
-	  "CHOKIDAR_USEPOLLING": "true",
- 	  "CHOKIDAR_INTERVAL": "100"
-	}
+
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
 
@@ -24,11 +15,32 @@
 	// "forwardPorts": [],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	// "postCreateCommand": "yarn install",
+	"postCreateCommand": "yarn install",
 
 	// Configure tool-specific properties.
-	// "customizations": {},
-
+	"customizations": {
+		"vscode": {
+			"settings": {},
+			"extensions": [
+				"esbenp.prettier-vscode",
+				"swyx.swyx-react-typescript-snippets",
+				"eamodio.gitlens",
+				"usernamehw.errorlens",
+				"planbcoding.vscode-react-refactor",
+				"bradlc.vscode-tailwindcss",
+				"ChakrounAnas.turbo-console-log",
+				"pmneo.tsimporter",
+				"meganrogge.template-string-converter",
+				"ms-vscode.vscode-typescript-next"
+			]
+		}
+	},
+	"portsAttributes": {
+		"3000": {
+			"label": "Application",
+			"onAutoForward": "notify"
+		}
+	}
 	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
 	// "remoteUser": "root"
 }

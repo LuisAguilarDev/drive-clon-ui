@@ -1,19 +1,19 @@
 import React, { FC, useCallback, useEffect, useState, useRef } from "react";
 import { auth } from "../lib/firebase/firebaseConfig";
 import { onAuthStateChanged, getRedirectResult } from "firebase/auth";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router-dom";
 
 // Singleton para la instancia de Firebase UI
 let firebaseUiInstance: any = null;
 
 interface Props {
-  config: firebaseui.auth.Config;
+  config: any;
 }
 
 const FirebaseSignIn: FC<Props> = ({ config }) => {
   const [user, setUser] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);  // Estado para errores
-  const router = useRouter();
+  const navigate = useNavigate();
   const authContainerRef = useRef<HTMLDivElement>(null);  // Referencia para el div
 
   // Carga Firebase UI y maneja instancias
@@ -43,7 +43,7 @@ const FirebaseSignIn: FC<Props> = ({ config }) => {
         const result = await getRedirectResult(auth);
         if (result && result.user) {
           setUser(result.user);
-          router.push("/drive");
+          navigate("/drive");
         }
       } catch (err) {
         console.error("Redirect login failed:", err);
@@ -52,18 +52,18 @@ const FirebaseSignIn: FC<Props> = ({ config }) => {
     };
 
     checkRedirectResult();
-  }, [router]);
+  }, [navigate]);
 
   // Listener para cambios en el estado de autenticación
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
       if (user) {
-        router.push("/drive");
+        navigate("/drive");
       }
     });
     return () => unsubscribe();
-  }, [router]);
+  }, [navigate]);
 
   useEffect(() => {
     loadFirebaseui();

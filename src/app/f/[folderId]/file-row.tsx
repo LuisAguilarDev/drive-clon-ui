@@ -1,5 +1,5 @@
 import { Folder as FolderIcon, FileIcon, Trash2Icon } from "lucide-react";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import { Button } from "~/components/ui/button";
 
 export function FileRow(props: { file: { id: string, url: string, name: string, size: string } }) {// typeof files_table.$inferSelect 
@@ -48,7 +48,7 @@ export function FolderRow(props: {
       <div className="grid grid-cols-12 items-center gap-4">
         <div className="col-span-6 flex items-center">
           <Link
-            href={`/f/${folder.id}`}
+            to={`/f/${folder.id}`}
             className="flex items-center text-gray-100 hover:text-blue-400"
           >
             <FolderIcon className="mr-3" size={20} />

@@ -1,4 +1,10 @@
-import { Folder as FolderIcon, FileIcon } from "lucide-react";
+import {
+  Download,
+  FileIcon,
+  Folder as FolderIcon,
+  Share2,
+  Trash2,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 
 import RowMenu from "./row-menu";
@@ -11,6 +17,13 @@ import {
   type DriveFile,
   type FolderSummary,
 } from "~/lib/api/files";
+
+// Confirmación del borrado: ahora es soft delete = mover a la papelera.
+const TRASH_CONFIRM = {
+  prompt: "Move to trash?",
+  confirmLabel: "Move",
+  busyLabel: "Moving…",
+};
 
 // Rejilla compartida por la cabecera y las filas: Nombre | Propietario | Tamaño.
 export const ROW_GRID = "grid grid-cols-[1fr_180px_140px] items-center";
@@ -41,11 +54,32 @@ export function FileRow(props: {
       <div className="absolute right-[10px] top-1/2 -translate-y-1/2">
         <RowMenu
           label={file.name}
-          onDownload={() => downloadFile(file.id, file.name)}
-          onDelete={async () => {
-            await deleteFile(file.id, file.name);
-            await props.onChanged();
-          }}
+          actions={[
+            {
+              key: "download",
+              icon: <Download size={16} />,
+              label: "Download",
+              onSelect: () => downloadFile(file.id, file.name),
+            },
+            {
+              key: "share",
+              icon: <Share2 size={16} />,
+              label: "Share",
+              disabled: true,
+              title: "Coming soon",
+              onSelect: () => undefined,
+            },
+            {
+              key: "delete",
+              icon: <Trash2 size={16} />,
+              label: "Delete",
+              confirm: TRASH_CONFIRM,
+              onSelect: async () => {
+                await deleteFile(file.id, file.name);
+                await props.onChanged();
+              },
+            },
+          ]}
         />
       </div>
     </li>
@@ -73,11 +107,32 @@ export function FolderRow(props: {
       <div className="absolute right-[10px] top-1/2 -translate-y-1/2">
         <RowMenu
           label={folder.name}
-          onDownload={() => downloadFolder(folder.id, folder.name)}
-          onDelete={async () => {
-            await deleteFolder(folder.id, folder.name);
-            await props.onChanged();
-          }}
+          actions={[
+            {
+              key: "download",
+              icon: <Download size={16} />,
+              label: "Download",
+              onSelect: () => downloadFolder(folder.id, folder.name),
+            },
+            {
+              key: "share",
+              icon: <Share2 size={16} />,
+              label: "Share",
+              disabled: true,
+              title: "Coming soon",
+              onSelect: () => undefined,
+            },
+            {
+              key: "delete",
+              icon: <Trash2 size={16} />,
+              label: "Delete",
+              confirm: TRASH_CONFIRM,
+              onSelect: async () => {
+                await deleteFolder(folder.id, folder.name);
+                await props.onChanged();
+              },
+            },
+          ]}
         />
       </div>
     </li>

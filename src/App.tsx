@@ -7,6 +7,7 @@ import DrivePage from "./app/(home)/drive/page";
 import ProfilePage from "./app/(home)/profile/page";
 import TermsOfService from "./app/(home)/terms-of-service/page";
 import GoogleDriveClone from "./app/f/[folderId]/page";
+import TrashPage from "./app/trash/page";
 
 export default function App() {
   return (
@@ -24,6 +25,7 @@ export default function App() {
         <Route path="/terms-of-service" element={<TermsOfService />} />
       </Route>
       <Route path="/f/:folderId" element={<GoogleDriveClone />} />
+      <Route path="/trash" element={<TrashPage />} />
       <Route path="/profile" element={<ProfilePage />} />
     </Routes>
   );

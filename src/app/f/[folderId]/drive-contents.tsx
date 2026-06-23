@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { FileRow, FolderRow, ROW_GRID } from "./file-row";
 import NewMenu from "./new-menu";
 import UploadDropzone from "./upload-dropzone";
+import DriveLayout from "~/components/drive-layout";
 import { AppButton } from "~/components/ui/app-button";
 import UserProfile from "~/components/user-profile";
 import { createFolder, type FolderListing } from "~/lib/api/files";
@@ -51,13 +52,9 @@ export default function DriveContents(props: {
   };
 
   return (
-    <div
-      className="min-h-screen bg-black p-8 text-white"
-      style={{ fontFamily: "'Inter', sans-serif" }}
-    >
-      <div className="mx-auto max-w-6xl">
-        {/* Cabecera: breadcrumb + usuario */}
-        <div className="mb-6 flex items-center justify-between">
+    <DriveLayout rootFolderId={rootFolderId}>
+      {/* Cabecera: breadcrumb + usuario */}
+      <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center">
             <Link
               to={rootFolderId ? `/f/${rootFolderId}` : "#"}
@@ -166,7 +163,6 @@ export default function DriveContents(props: {
             )}
           </div>
         </UploadDropzone>
-      </div>
-    </div>
+    </DriveLayout>
   );
 }

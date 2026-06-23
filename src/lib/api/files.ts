@@ -142,6 +142,106 @@ export async function deleteFolder(
   }
 }
 
+// --- Papelera (trash) -----------------------------------------------------
+// El soft delete del backend ES la papelera: un elemento está "en la papelera"
+// cuando tiene `deleted_at`. Sólo se listan los items de nivel tope.
+
+export interface TrashFolder {
+  id: number;
+  name: string;
+  parent_id: number | null;
+  deleted_at: string;
+}
+
+export interface TrashFile {
+  id: number;
+  name: string;
+  content_type: string | null;
+  size_bytes: number | null;
+  deleted_at: string;
+}
+
+export interface TrashListing {
+  folders: TrashFolder[];
+  files: TrashFile[];
+}
+
+/** Caller's trash: top-level trashed folders + files. */
+export async function listTrash(): Promise<TrashListing> {
+  const response = await apiFetch("/files/trash");
+  if (!response.ok) {
+    throw new Error(`Failed to load trash: ${response.status}`);
+  }
+  return (await response.json()) as TrashListing;
+}
+
+/** Restore a file from the trash (to its folder, or root if it's gone). */
+export async function restoreFile(fileId: number, name: string): Promise<void> {
+  const response = await apiFetch(`/files/${fileId}/restore`, {
+    method: "POST",
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to restore "${name}": ${response.status}`);
+  }
+}
+
+/** Restore a folder and its subtree from the trash. */
+export async function restoreFolder(
+  folderId: number,
+  name: string,
+): Promise<void> {
+  const response = await apiFetch(`/files/folders/${folderId}/restore`, {
+    method: "POST",
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to restore "${name}": ${response.status}`);
+  }
+}
+
+/** Permanently delete a trashed file (DB row + MinIO object). */
+export async function purgeFile(fileId: number, name: string): Promise<void> {
+  const response = await apiFetch(`/files/${fileId}/permanent`, {
+    method: "DELETE",
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to delete "${name}": ${response.status}`);
+  }
+}
+
+/** Permanently delete a trashed folder and its subtree. */
+export async function purgeFolder(
+  folderId: number,
+  name: string,
+): Promise<void> {
+  const response = await apiFetch(`/files/folders/${folderId}/permanent`, {
+    method: "DELETE",
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to delete "${name}": ${response.status}`);
+  }
+}
+
+/** Empty the trash: permanently delete everything in it. */
+export async function emptyTrash(): Promise<void> {
+  const response = await apiFetch("/files/trash", { method: "DELETE" });
+  if (!response.ok) {
+    throw new Error(`Failed to empty trash: ${response.status}`);
+  }
+}
+
+/** Short local date (e.g. "Jun 22, 2026"). Returns "—" when invalid. */
+export function formatDate(iso: string): string {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) {
+    return "—";
+  }
+  return date.toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+}
+
 /** Human-readable size (e.g. "20 KB"). Returns "—" when unknown. */
 export function formatBytes(bytes: number | null): string {
   if (bytes === null || bytes === undefined) {

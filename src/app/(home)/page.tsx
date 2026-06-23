@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Button } from "~/components/ui/button";
+import { AppButton } from "~/components/ui/app-button";
 import { useAuth } from "~/lib/keycloak/AuthProvider";
 
 export default function HomePage() {
@@ -23,14 +23,9 @@ export default function HomePage() {
       <p className="mx-auto mb-8 max-w-md text-xl text-neutral-400 md:text-2xl">
         Bright, fast, and secure cloud storage for all your needs.
       </p>
-      <Button
-        size="lg"
-        type="button"
-        onClick={handleGetStarted}
-        className="border border-neutral-700 bg-neutral-800 text-white transition-colors hover:bg-neutral-700"
-      >
+      <AppButton size="lg" type="button" onClick={handleGetStarted}>
         Get Started
-      </Button>
+      </AppButton>
       <footer className="mt-16 text-sm text-neutral-500">
         © {new Date().getFullYear()} TerraNova Drive. All rights reserved.
       </footer>

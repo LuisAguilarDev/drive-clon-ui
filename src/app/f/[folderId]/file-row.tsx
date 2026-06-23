@@ -1,62 +1,84 @@
-import { Folder as FolderIcon, FileIcon, Trash2Icon } from "lucide-react";
+import { Folder as FolderIcon, FileIcon } from "lucide-react";
 import { Link } from "react-router-dom";
-import { Button } from "~/components/ui/button";
 
-export function FileRow(props: { file: { id: string, url: string, name: string, size: string } }) {// typeof files_table.$inferSelect 
+import RowMenu from "./row-menu";
+import {
+  deleteFile,
+  deleteFolder,
+  downloadFile,
+  downloadFolder,
+  formatBytes,
+  type DriveFile,
+  type FolderSummary,
+} from "~/lib/api/files";
+
+// Rejilla compartida por la cabecera y las filas: Nombre | Propietario | Tamaño.
+export const ROW_GRID = "grid grid-cols-[1fr_180px_140px] items-center";
+
+// Iconos de fichero/carpeta: el trazo hereda el color del texto (currentColor).
+const iconClass = "shrink-0 text-ink-muted";
+
+const rowClass = `group relative h-14 px-[22px] transition-[background] duration-[120ms] hover:bg-row-hover ${ROW_GRID}`;
+const secondaryCell = "text-[14px] text-ink-subtle";
+
+export function FileRow(props: {
+  file: DriveFile;
+  onChanged: () => void | Promise<void>;
+}) {
   const { file } = props;
+  // "me" cuando el usuario actual es el propietario (lo decide el backend).
+  const ownerLabel = file.owner.is_me ? "me" : file.owner.name || "—";
   return (
-    <li
-      key={file.id}
-      className="hover:bg-gray-750 border-b border-gray-700 px-6 py-4"
-    >
-      <div className="grid grid-cols-12 items-center gap-4">
-        <div className="col-span-6 flex items-center">
-          <a
-            href={file.url}
-            className="flex items-center text-gray-100 hover:text-blue-400"
-            target="_blank"
-          >
-            <FileIcon className="mr-3" size={20} />
-            {file.name}
-          </a>
-        </div>
-        <div className="col-span-2 text-gray-400">{"file"}</div>
-        <div className="col-span-3 text-gray-400">{file.size}</div>
-        <div className="col-span-1 text-gray-400">
-          <Button
-            variant="ghost"
-            // onClick={() => deleteFile(file.id)}
-            aria-label="Delete file"
-          >
-            <Trash2Icon size={20} />
-          </Button>
-        </div>
+    <li className={rowClass}>
+      <div className="flex min-w-0 items-center gap-[14px] text-[15px] text-ink">
+        <FileIcon size={18} className={iconClass} />
+        <span className="truncate">{file.name}</span>
+      </div>
+      <div className={secondaryCell}>{ownerLabel}</div>
+      <div className={`${secondaryCell} tabular-nums`}>
+        {formatBytes(file.size_bytes)}
+      </div>
+      <div className="absolute right-[10px] top-1/2 -translate-y-1/2">
+        <RowMenu
+          label={file.name}
+          onDownload={() => downloadFile(file.id, file.name)}
+          onDelete={async () => {
+            await deleteFile(file.id, file.name);
+            await props.onChanged();
+          }}
+        />
       </div>
     </li>
   );
 }
 
 export function FolderRow(props: {
-  folder: { id: string, name: string };
+  folder: FolderSummary;
+  onChanged: () => void | Promise<void>;
 }) {
   const { folder } = props;
   return (
-    <li
-      key={folder.id}
-      className="hover:bg-gray-750 border-b border-gray-700 px-6 py-4"
-    >
-      <div className="grid grid-cols-12 items-center gap-4">
-        <div className="col-span-6 flex items-center">
-          <Link
-            to={`/f/${folder.id}`}
-            className="flex items-center text-gray-100 hover:text-blue-400"
-          >
-            <FolderIcon className="mr-3" size={20} />
-            {folder.name}
-          </Link>
-        </div>
-        <div className="col-span-3 text-gray-400"></div>
-        <div className="col-span-3 text-gray-400"></div>
+    <li className={rowClass}>
+      <div className="flex min-w-0 items-center text-[15px] text-ink">
+        <Link
+          to={`/f/${folder.id}`}
+          className="flex min-w-0 items-center gap-[14px] hover:text-white"
+        >
+          <FolderIcon size={18} className={iconClass} />
+          <span className="truncate">{folder.name}</span>
+        </Link>
+      </div>
+      <div className={secondaryCell}>—</div>
+      <div className={`${secondaryCell} tabular-nums`}>—</div>
+      <div className="absolute right-[10px] top-1/2 -translate-y-1/2">
+        <RowMenu
+          label={folder.name}
+          onDownload={() => downloadFolder(folder.id, folder.name)}
+          onDelete={async () => {
+            await deleteFolder(folder.id, folder.name);
+            await props.onChanged();
+          }}
+        />
       </div>
     </li>
   );

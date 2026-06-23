@@ -1,11 +1,13 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
-import { Button } from "~/components/ui/button";
 import { useAuth } from "~/lib/keycloak/AuthProvider";
+import { getRootFolder } from "~/lib/api/files";
 
 export default function DrivePage() {
   const navigate = useNavigate();
-  const { initialized, authenticated, user, organization, logout } = useAuth();
+  // `organization` confirma que el backend ya provisionó al usuario y su raíz.
+  const { initialized, authenticated, organization } = useAuth();
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (initialized && !authenticated) {
@@ -13,37 +15,40 @@ export default function DrivePage() {
     }
   }, [initialized, authenticated, navigate]);
 
+  // Tras el login, abre la carpeta raíz del usuario.
+  useEffect(() => {
+    if (!initialized || !authenticated || !organization) {
+      return;
+    }
+    let active = true;
+    void getRootFolder()
+      .then((root) => {
+        if (active) {
+          navigate(`/f/${root.id}`, { replace: true });
+        }
+      })
+      .catch((rootError) => {
+        if (active) {
+          setError(
+            rootError instanceof Error
+              ? rootError.message
+              : "Could not open your drive",
+          );
+        }
+      });
+    return () => {
+      active = false;
+    };
+  }, [initialized, authenticated, organization, navigate]);
+
   if (!initialized) {
     return <p className="text-neutral-400">Loading…</p>;
   }
-
   if (!authenticated) {
     return <Navigate to="/sign-in" replace />;
   }
-
-  return (
-    <>
-      <div className="text-center h-full flex items-center justify-center gap-4">
-        <h2 className="text-sm font-bold text-white flex items-center justify-center">
-          Welcome, {user?.email}!
-          {organization ? ` · ${organization.name}` : ""}
-        </h2>
-        <button
-          onClick={logout}
-          className="bg-red-500 text-white p-2 rounded hover:bg-red-600"
-        >
-          Sign Out
-        </button>
-      </div>
-      <form
-        onSubmit={(event) => {
-          event.preventDefault();
-          // const rootFolderId = await MUTATIONS.onboardUser(user.uid);
-          // navigate(`/f/${rootFolderId}`);
-        }}
-      >
-        <Button type="submit">Create new Folder</Button>
-      </form>
-    </>
-  );
+  if (error) {
+    return <p className="text-red-400">{error}</p>;
+  }
+  return <p className="text-neutral-400">Opening your drive…</p>;
 }

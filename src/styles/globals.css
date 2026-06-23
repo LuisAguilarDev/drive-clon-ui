@@ -4,6 +4,27 @@
    v4 default of `prefers-color-scheme`. */
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* Dark file-manager palette. Named tokens replace raw hex across the UI so
+   colors are referenced by role, never by literal value. Two groups:
+   - surfaces/structure (darkest container → lighter interactive edges)
+   - an "ink" text scale, from primary (lightest) to faint (darkest).
+   Page background and primary button text use Tailwind's built-in
+   `black`/`white`. */
+@theme {
+  --color-surface: #0a0a0a; /* list/table container */
+  --color-panel: #0d0d0d; /* headers, dropdown menus, popovers */
+  --color-control: #1c1c1f; /* buttons and inputs fill */
+  --color-elevated: #2e2e33; /* control borders + interactive hover fill */
+  --color-row-hover: #141416; /* table row hover */
+  --color-divider: #161618; /* dividers between table rows */
+  --color-line: #1f1f22; /* panel/container borders */
+
+  --color-ink: #fafafa; /* primary text */
+  --color-ink-muted: #a1a1aa; /* secondary text, icons, inactive breadcrumb */
+  --color-ink-subtle: #71717a; /* column headers, file metadata */
+  --color-ink-faint: #52525b; /* chevrons, empty/loading states */
+}
+
 /* Map the design tokens (HSL channel triples below) to Tailwind color
    utilities such as `bg-background`, `text-foreground`, `border-border`. */
 @theme inline {

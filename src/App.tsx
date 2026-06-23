@@ -4,6 +4,7 @@ import HomeLayout from "./app/(home)/layout";
 import HomePage from "./app/(home)/page";
 import SignInPage from "./app/(home)/sign-in/page";
 import DrivePage from "./app/(home)/drive/page";
+import ProfilePage from "./app/(home)/profile/page";
 import TermsOfService from "./app/(home)/terms-of-service/page";
 import GoogleDriveClone from "./app/f/[folderId]/page";
 
@@ -23,6 +24,7 @@ export default function App() {
         <Route path="/terms-of-service" element={<TermsOfService />} />
       </Route>
       <Route path="/f/:folderId" element={<GoogleDriveClone />} />
+      <Route path="/profile" element={<ProfilePage />} />
     </Routes>
   );
 }

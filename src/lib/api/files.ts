@@ -150,7 +150,7 @@ export interface TrashFolder {
   id: number;
   name: string;
   parent_id: number | null;
-  deleted_at: string;
+  trashed_at: string;
 }
 
 export interface TrashFile {
@@ -158,7 +158,7 @@ export interface TrashFile {
   name: string;
   content_type: string | null;
   size_bytes: number | null;
-  deleted_at: string;
+  trashed_at: string;
 }
 
 export interface TrashListing {

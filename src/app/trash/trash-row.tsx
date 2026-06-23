@@ -37,7 +37,7 @@ export function TrashFileRow(props: {
         <FileIcon size={18} className={iconClass} />
         <span className="truncate">{file.name}</span>
       </div>
-      <div className={secondaryCell}>{formatDate(file.deleted_at)}</div>
+      <div className={secondaryCell}>{formatDate(file.trashed_at)}</div>
       <div className={`${secondaryCell} tabular-nums`}>
         {formatBytes(file.size_bytes)}
       </div>
@@ -83,7 +83,7 @@ export function TrashFolderRow(props: {
         <FolderIcon size={18} className={iconClass} />
         <span className="truncate">{folder.name}</span>
       </div>
-      <div className={secondaryCell}>{formatDate(folder.deleted_at)}</div>
+      <div className={secondaryCell}>{formatDate(folder.trashed_at)}</div>
       <div className={`${secondaryCell} tabular-nums`}>—</div>
       <div className="absolute right-[10px] top-1/2 -translate-y-1/2">
         <RowMenu

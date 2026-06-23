@@ -28,11 +28,5 @@
     }
   },
   "include": ["src", "vite.config.ts"],
-  "exclude": [
-    "node_modules",
-    "src/app/layout.tsx",
-    "src/app/api/uploadthing/route.ts",
-    "src/env.js",
-    "app"
-  ]
+  "exclude": ["node_modules"]
 }

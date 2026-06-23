@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-TerraNova Drive — a Google Drive-style file manager built as a **Vite + React SPA**. Keycloak (OIDC) handles auth with Google federated *inside* Keycloak; UploadThing handles uploads; a separate backend (reached via `VITE_API_URL`) owns the data and provisions a per-user organization on first sign-in.
+TerraNova Drive — a Google Drive-style file manager built as a **Vite + React SPA**. Keycloak (OIDC) handles auth with Google federated *inside* Keycloak; a separate backend (reached via `VITE_API_URL`) owns the data, file storage (presigned uploads/downloads), and provisions a per-user organization on first sign-in.
 
 The data layer is **not yet wired up**: folder/file listing renders empty collections and `src/lib/mock-data.ts` holds sample shapes. Commented `QUERIES`/`MUTATIONS` calls mark where backend integration belongs.
 
@@ -28,7 +28,8 @@ There is **no test runner and no ESLint config** wired up. `pnpm typecheck` is t
 **Migrated from Next.js App Router to a Vite SPA.** This leaves important footguns:
 
 - The `src/app/**` tree keeps Next's folder-route *naming* (`(home)`, `f/[folderId]`, `page.tsx`, `layout.tsx`) but routing is now **manual** in `src/App.tsx` via `react-router-dom`. Adding a route means editing `App.tsx` — creating a `page.tsx` does nothing on its own.
-- Next server-only files still exist but are **excluded from the build** (`tsconfig.json` excludes, plus a stale top-level `app/` dir). `src/app/api/uploadthing/core.ts` imports from `uploadthing/next` and its server logic does **not** run — uploads currently complete client-side with the backend persistence still commented out.
+- `src/app/**` keeps Next's folder-route *naming* but contains only client components rendered via `react-router-dom`. (The old Next server-only leftovers — top-level `app/`, `src/app/layout.tsx`, `src/app/api/uploadthing/`, the UploadThing deps — have been deleted.)
+- **The real file I/O lives in `src/lib/api/files.ts`** (used by `useUploads` + the drive/trash pages), wired to the backend: uploads use a **presigned flow** (`POST /files` for a presigned URL → `PUT` straight to object storage → `POST /files/{id}/confirm`); folder downloads are **async** (`POST …/archive` → poll `GET /files/archives/{job_id}` → open the presigned `download_url`). Single-file download streams via `GET /files/{id}/download`. See the backend's `docs/3_files_flow/`.
 
 **Path aliases:** `~/*` → `./src/*`, `@/*` → repo root. Both are defined in *both* `vite.config.ts` and `tsconfig.json` — keep them in sync.
 

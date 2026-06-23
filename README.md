@@ -1,7 +1,8 @@
 # Google Drive Clon - TerraNova Drive
 
 A React single-page app (Vite + Tailwind CSS v4) for a Google Drive-style file
-manager, with Keycloak (OIDC) authentication and UploadThing uploads.
+manager, with Keycloak (OIDC) authentication. File storage goes through the
+backend via presigned URLs (uploads and folder-ZIP downloads).
 
 ## Tech stack
 
@@ -9,7 +10,7 @@ manager, with Keycloak (OIDC) authentication and UploadThing uploads.
 - **UI:** React 18 + React Router 6
 - **Styling:** Tailwind CSS v4 (via `@tailwindcss/vite`)
 - **Auth:** Keycloak (OIDC via `keycloak-js`); Google sign-in is federated inside Keycloak
-- **Uploads:** UploadThing
+- **File storage:** backend presigned URLs → object storage (MinIO/S3)
 
 ## Prerequisites
 
@@ -32,9 +33,10 @@ pnpm preview     # preview the production build
 pnpm typecheck   # run the TypeScript type checker
 ```
 
-> Migrated from Next.js (App Router) to a Vite SPA. The former server-only
-> pieces (`src/app/api/uploadthing`, `src/app/layout.tsx`) are no longer part of
-> the build graph and are kept only for reference.
+> Migrated from Next.js (App Router) to a Vite SPA: routing is manual in
+> `src/App.tsx` via `react-router-dom`. The leftover Next server-only pieces
+> (top-level `app/`, `src/app/layout.tsx`, `src/app/api/uploadthing/`) have been
+> removed.
 
 ## TODO
 

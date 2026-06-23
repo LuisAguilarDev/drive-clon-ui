@@ -64,25 +64,67 @@ export async function createFolder(
   return (await response.json()) as FolderSummary;
 }
 
-/** Upload a single file into `folderId` (multipart). */
+interface InitUploadResponse {
+  file_id: number;
+  upload_url: string;
+  method: string;
+}
+
+/**
+ * Sube un fichero con URL prefirmada en tres pasos:
+ *   1. POST /files con METADATOS → el backend crea la fila PENDING y devuelve una
+ *      URL prefirmada (el backend no recibe el binario).
+ *   2. PUT del binario DIRECTO al almacenamiento con esa URL.
+ *   3. POST /files/{id}/confirm → el backend verifica el objeto y lo activa.
+ */
 export async function uploadFile(
   folderId: number,
   file: File,
 ): Promise<DriveFile> {
-  const form = new FormData();
-  form.append("folder_id", String(folderId));
-  // No fijar Content-Type: el navegador añade el boundary del multipart.
-  // Pasamos el nombre base explícitamente: al subir una carpeta, el navegador
-  // usaría `webkitRelativePath` (p. ej. "scripts/foo.txt") como nombre del
-  // fichero, lo que prefijaría la carpeta al nombre almacenado.
+  // Al subir una carpeta, el navegador usaría `webkitRelativePath`
+  // (p. ej. "scripts/foo.txt") como name; nos quedamos con el nombre base para
+  // no prefijar la carpeta al nombre almacenado.
   const baseName = file.name.split(/[\\/]/).pop() || file.name;
-  form.append("file", file, baseName);
 
-  const response = await apiFetch("/files", { method: "POST", body: form });
-  if (!response.ok) {
-    throw new Error(`Failed to upload "${file.name}": ${response.status}`);
+  // 1) Pedir la URL prefirmada (sólo metadatos).
+  const initResponse = await apiFetch("/files", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      filename: baseName,
+      content_type: file.type || null,
+      size_bytes: file.size,
+      folder_id: folderId,
+    }),
+  });
+  if (!initResponse.ok) {
+    throw new Error(
+      `Failed to start upload of "${baseName}": ${initResponse.status}`,
+    );
   }
-  return (await response.json()) as DriveFile;
+  const { file_id, upload_url } =
+    (await initResponse.json()) as InitUploadResponse;
+
+  // 2) Subir el binario DIRECTO al almacenamiento. Es una URL prefirmada: NO se
+  //    le adjunta el Bearer (`fetch` plano, no `apiFetch`) ni cabeceras extra,
+  //    que romperían la firma SigV4.
+  const putResponse = await fetch(upload_url, { method: "PUT", body: file });
+  if (!putResponse.ok) {
+    throw new Error(
+      `Failed to upload "${baseName}" to storage: ${putResponse.status}`,
+    );
+  }
+
+  // 3) Confirmar: el backend comprueba el objeto y activa el fichero.
+  const confirmResponse = await apiFetch(`/files/${file_id}/confirm`, {
+    method: "POST",
+  });
+  if (!confirmResponse.ok) {
+    throw new Error(
+      `Failed to confirm upload of "${baseName}": ${confirmResponse.status}`,
+    );
+  }
+  return (await confirmResponse.json()) as DriveFile;
 }
 
 /** Dispara la descarga de un blob en el navegador con el nombre indicado. */
@@ -109,16 +151,68 @@ export async function downloadFile(
   triggerBlobDownload(await response.blob(), name);
 }
 
-/** Download a folder as a ZIP containing all its files (recursively). */
+interface ArchiveJob {
+  job_id: string;
+  status: "queued" | "processing" | "ready" | "failed" | "expired";
+  name: string;
+  size_bytes: number | null;
+  download_url: string | null;
+  error: string | null;
+}
+
+const ARCHIVE_POLL_INTERVAL_MS = 1500;
+const ARCHIVE_POLL_TIMEOUT_MS = 120_000;
+
+const delay = (ms: number) =>
+  new Promise<void>((resolve) => setTimeout(resolve, ms));
+
+/** Abre una URL de descarga (la cabecera Content-Disposition del objeto fuerza
+ * que el navegador la descargue en vez de navegar a ella). */
+function triggerUrlDownload(url: string): void {
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.rel = "noopener";
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+}
+
+/**
+ * Descarga una carpeta como ZIP (asíncrono): encola un job, hace poll hasta que
+ * esté listo y entonces descarga el ZIP DIRECTO del almacenamiento por su URL
+ * prefirmada (el ancho de banda no pasa por el backend).
+ */
 export async function downloadFolder(
   folderId: number,
   name: string,
 ): Promise<void> {
-  const response = await apiFetch(`/files/folders/${folderId}/download`);
-  if (!response.ok) {
-    throw new Error(`Failed to download "${name}": ${response.status}`);
+  const startResponse = await apiFetch(`/files/folders/${folderId}/archive`, {
+    method: "POST",
+  });
+  if (!startResponse.ok) {
+    throw new Error(`Failed to start ZIP of "${name}": ${startResponse.status}`);
   }
-  triggerBlobDownload(await response.blob(), `${name}.zip`);
+  const { job_id } = (await startResponse.json()) as ArchiveJob;
+
+  const deadline = Date.now() + ARCHIVE_POLL_TIMEOUT_MS;
+  for (;;) {
+    const pollResponse = await apiFetch(`/files/archives/${job_id}`);
+    if (!pollResponse.ok) {
+      throw new Error(`Failed to check ZIP of "${name}": ${pollResponse.status}`);
+    }
+    const job = (await pollResponse.json()) as ArchiveJob;
+    if (job.status === "ready" && job.download_url) {
+      triggerUrlDownload(job.download_url);
+      return;
+    }
+    if (job.status === "failed" || job.status === "expired") {
+      throw new Error(job.error || `ZIP of "${name}" ${job.status}`);
+    }
+    if (Date.now() > deadline) {
+      throw new Error(`Timed out preparing ZIP of "${name}"`);
+    }
+    await delay(ARCHIVE_POLL_INTERVAL_MS);
+  }
 }
 
 /** Delete a single file (soft delete on the backend). */

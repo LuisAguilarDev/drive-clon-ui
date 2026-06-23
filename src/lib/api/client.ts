@@ -7,7 +7,9 @@ import keycloak from "~/lib/keycloak/keycloak";
 //      que forzamos un refresh transparente (el usuario ya está autenticado, no
 //      se le pide nada). Así el token siguiente ya incluye la organización.
 
-const API_URL = import.meta.env.VITE_API_URL;
+// Base versionada de la API: todas las rutas que se pasan a `apiFetch` son
+// relativas a `/api/v1` (p. ej. "/auth/session" → "<host>/api/v1/auth/session").
+const API_BASE = `${import.meta.env.VITE_API_URL}/api/v1`;
 
 // keycloak-js usa cabeceras en minúscula al exponerlas; Headers.get es
 // case-insensitive de todas formas.
@@ -28,7 +30,7 @@ async function authorizedFetch(
     headers.set("Authorization", `Bearer ${keycloak.token}`);
   }
 
-  return fetch(`${API_URL}${path}`, { ...options, headers });
+  return fetch(`${API_BASE}${path}`, { ...options, headers });
 }
 
 export async function apiFetch(
